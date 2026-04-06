@@ -1,4 +1,13 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
+import { LogService } from './log.service';
+import { AnalyzeLogDto } from './log.interface';
 
-@Controller('log')
-export class LogController {}
+@Controller('logs')
+export class LogController {
+  constructor(private readonly logService: LogService) {}
+
+  @Post('analyze')
+  async analyze(@Body() dto: AnalyzeLogDto) {
+    return this.logService.analyze(dto);
+  }
+}

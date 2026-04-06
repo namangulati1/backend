@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
 import { LogModule } from './modules/log/log.module';
 import { AiModule } from './modules/ai/ai.module';
 
