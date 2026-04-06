@@ -65,4 +65,21 @@ export class LogService {
       return null;
     }
   }
+
+  async getAnalytics() {
+    const [totalLogs, errorTypeDistribution, severityDistribution, topErrors] =
+      await Promise.all([
+        this.logRepository.getTotalLogs(),
+        this.logRepository.getErrorTypeDistribution(),
+        this.logRepository.getSeverityDistribution(),
+        this.logRepository.getTopErrors(),
+      ]);
+
+    return {
+      totalLogs,
+      errorTypeDistribution,
+      severityDistribution,
+      topErrors,
+    };
+  }
 }
