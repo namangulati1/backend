@@ -24,17 +24,27 @@ Output format:
   "severity": "low | medium | high"
 }
 `;
-    const response = await fetch('http://localhost:11434/api/generate', {
+    const apiKey = process.env.GEMINI_API_KEY || '';
+    const response = await fetch(`${process.env.GEMINI_API_URL}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-goog-api-key': apiKey,
+      },
       body: JSON.stringify({
-        model: 'gemma4:latest',
-        prompt: prompt,
-        stream: false,
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt,
+              },
+            ],
+          },
+        ],
       }),
     });
 
     const data = await response.json();
-    return data.response;
+    return data.candidates?.[0]?.content?.parts?.[0]?.text;
   }
 }
