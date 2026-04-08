@@ -1,7 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { GoogleGenAI, ThinkingLevel } from '@google/genai';
 
 @Injectable()
 export class AiService {
+  private ai: GoogleGenAI;
+
+  constructor() {
+    this.ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+    });
+  }
+
   async analyzeLog(log: string): Promise<any> {
     const prompt = `
         You are a senior backend engineer with 10+ years of experience.
@@ -24,27 +33,35 @@ Output format:
   "severity": "low | medium | high"
 }
 `;
-    const apiKey = process.env.GEMINI_API_KEY || '';
-    const response = await fetch(`${process.env.GEMINI_API_URL}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-goog-api-key': apiKey,
+
+    const config = {
+      thinkingConfig: {
+        thinkingLevel: ThinkingLevel.HIGH,
       },
-      body: JSON.stringify({
-        contents: [
+    };
+    const model = 'gemma-4-26b-a4b-it';
+    const contents = [
+      {
+        role: 'user' as const,
+        parts: [
           {
-            parts: [
-              {
-                text: prompt,
-              },
-            ],
+            text: prompt,
           },
         ],
-      }),
+      },
+    ];
+    const response = await this.ai.models.generateContentStream({
+      model,
+      config,
+      contents,
     });
 
-    const data = await response.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text;
+    let result = '';
+    for await (const chunk of response) {
+      if (chunk.text) {
+        result += chunk.text;
+      }
+    }
+    return result;
   }
 }
